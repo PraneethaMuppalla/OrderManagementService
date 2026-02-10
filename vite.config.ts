@@ -12,8 +12,8 @@ export default defineConfig({
     },
   },
   preview: {
-    allowedHosts: [
-      'ordermanagementservice-wcij.onrender.com'
-    ]
+    host: true,
+    port: Number(process.env.PORT) || 5173,
+    allowedHosts: true
   }
 });
