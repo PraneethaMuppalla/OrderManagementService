@@ -11,16 +11,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/hooks/redux';
-import { login } from '@/store/authSlice';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useLogin } from '@/hooks/useAuth';
 
 export default function SignIn() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { mutate: login, isPending } = useLogin();
   
   const form = useForm<SignInFormValues>({
       resolver: zodResolver(signInSchema),
@@ -30,21 +28,9 @@ export default function SignIn() {
       }
   });
 
-  const { isSubmitting } = form.formState;
-
   const onSubmit = async (data: SignInFormValues) => {
-    // Simulate API call
-    console.log('Sign In Data:', data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // Dispatch login action (mock)
-    dispatch(login({
-      user: { id: '1', name: 'User', email: data.email },
-      token: 'mock-token-123',
-    }));
-    
-    // Redirect to home page
-    navigate('/');
+    // Call the login API
+    login(data);
   };
 
   return (
@@ -117,9 +103,9 @@ export default function SignIn() {
             <Button
                 type="submit"
                 className="w-full mt-2"
-                disabled={isSubmitting}
+                disabled={isPending}
             >
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isPending ? "Signing in..." : "Sign in"}
             </Button>
             </form>
          </Form>

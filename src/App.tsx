@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SignUp from '@/pages/SignUp';
 import SignIn from '@/pages/SignIn';
-import Home from '@/pages/Home';
 import Menu from '@/pages/Menu';
 import Checkout from '@/pages/Checkout';
 import OrderStatus from '@/pages/OrderStatus';
+import Orders from '@/pages/Orders';
 import Layout from '@/layouts/Layout';
 import { useAppSelector } from '@/hooks/redux';
 import { JSX } from 'react';
@@ -24,18 +24,11 @@ function App() {
           path="/"
           element={
             <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/menu"
-          element={
-            <PrivateRoute>
               <Menu />
             </PrivateRoute>
           }
         />
+        <Route path="/menu" element={<Navigate to="/" replace />} />
         <Route
           path="/checkout"
           element={
@@ -49,6 +42,14 @@ function App() {
           element={
             <PrivateRoute>
               <OrderStatus />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <PrivateRoute>
+              <Orders />
             </PrivateRoute>
           }
         />

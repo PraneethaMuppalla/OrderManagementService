@@ -3,8 +3,12 @@ import { Footer } from "@/components/Footer";
 import { Outlet } from "react-router-dom";
 
 import { Toaster } from "@/components/ui/sonner";
+import { useOrderSocket } from "@/hooks/useOrder";
 
 export default function Layout() {
+  // Initialize socket connection for order updates
+  useOrderSocket();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />

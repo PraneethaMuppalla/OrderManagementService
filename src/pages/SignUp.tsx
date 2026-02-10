@@ -11,17 +11,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/hooks/redux';
-import { login } from '@/store/authSlice';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useRegister } from '@/hooks/useAuth';
 
 export default function SignUp() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { mutate: register, isPending } = useRegister();
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -30,24 +28,18 @@ export default function SignUp() {
       email: "",
       password: "",
       confirmPassword: "",
+      phone_number: "",
     },
   });
 
-  const { isSubmitting } = form.formState;
-
   const onSubmit = async (data: SignUpFormValues) => {
-    // Simulate API call
-    console.log('Sign Up Data:', data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // Dispatch login action (mock)
-    dispatch(login({
-      user: { id: '1', name: data.name, email: data.email },
-      token: 'mock-token-123',
-    }));
-    
-    // Redirect to home page
-    navigate('/');
+    // Call the registration API
+    register({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phone_number: data.phone_number,
+    });
   };
 
   return (
@@ -130,6 +122,19 @@ export default function SignUp() {
               />
               <FormField
                 control={form.control}
+                name="phone_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="9012345678" type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
@@ -167,9 +172,9 @@ export default function SignUp() {
             <Button
               type="submit"
               className="w-full mt-2"
-              disabled={isSubmitting}
+              disabled={isPending}
             >
-              {isSubmitting ? "Creating account..." : "Sign up"}
+              {isPending ? "Creating account..." : "Sign up"}
             </Button>
           </form>
         </Form>

@@ -12,20 +12,23 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { clearCart } from '@/store/cartSlice';
-import { placeOrder } from '@/store/orderSlice';
+import { useAppSelector } from '@/hooks/redux';
 import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'sonner';
+import { useCart } from '@/hooks/useCart';
+import { usePlaceOrder } from '@/hooks/useOrder';
+import { Loader2 } from 'lucide-react';
 
 export default function Checkout() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { items } = useAppSelector((state) => state.cart);
   const { user } = useAppSelector((state) => state.auth);
-
-  const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  
+  // Use API cart
+  const { data: cartData, isLoading: cartLoading } = useCart();
+  const { mutate: placeOrder, isPending: isPlacingOrder } = usePlaceOrder();
+  
+  const cart = cartData?.cart;
+  const items = cart?.items || [];
+  const totalAmount = cart?.subtotal || 0;
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -36,37 +39,27 @@ export default function Checkout() {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
-  const onSubmit = async (data: CheckoutFormValues) => {
-    // Simulate API call
-    console.log('Checkout Data:', data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // Create new order
-    const orderId = uuidv4();
-    const newOrder = {
-      id: orderId,
-      items: [...items],
-      totalAmount,
-      status: 'Order Received' as const,
-      deliveryDetails: {
-        name: data.name,
-        address: data.address,
-        phoneNumber: data.phoneNumber,
-      },
-      createdAt: new Date().toISOString(),
-    };
-
-    // Dispatch actions
-    dispatch(placeOrder(newOrder));
-    dispatch(clearCart());
-    
-    toast.success('Order placed successfully!');
-    
-    // Redirect to Order Status page
-    navigate(`/order-status/${orderId}`);
+  const onSubmit = (data: CheckoutFormValues) => {
+    placeOrder({
+        delivery_name: data.name,
+        delivery_address: data.address,
+        delivery_phone: data.phoneNumber
+    }, {
+        onSuccess: (response) => {
+            // Redirect to Order Status page
+            navigate(`/order-status/${response.order.id}`);
+        }
+    });
   };
+
+  if (cartLoading) {
+      return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+              <Loader2 className="h-8 w-8 animate-spin mb-4" />
+              <p>Loading checkout...</p>
+          </div>
+      )
+  }
 
   if (items.length === 0) {
       return (
@@ -91,15 +84,15 @@ export default function Checkout() {
                     <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-0 border-border/50">
                         <div className="flex items-center gap-3">
                             <span className="font-medium bg-background text-foreground h-6 w-6 flex items-center justify-center rounded-full text-xs shadow-sm shadow-black/5 border border-border">{item.quantity}</span>
-                            <span className="text-sm font-medium">{item.name}</span>
+                            <span className="text-sm font-medium">{item.menuItem.name}</span>
                         </div>
-                        <span className="text-sm font-semibold">₹{(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-sm font-semibold">₹{item.itemTotal}</span>
                     </div>
                 ))}
             </div>
             <div className="border-t pt-4 mt-4 flex justify-between items-center font-bold text-lg">
                 <span>Total</span>
-                <span>₹{totalAmount.toFixed(2)}</span>
+                <span>₹{totalAmount}</span>
             </div>
         </div>
 
@@ -156,9 +149,9 @@ export default function Checkout() {
                 type="submit"
                 className="w-full mt-6"
                 size="lg"
-                disabled={isSubmitting}
+                disabled={isPlacingOrder}
                 >
-                {isSubmitting ? "Placing Order..." : `Pay ₹${totalAmount.toFixed(2)}`}
+                {isPlacingOrder ? "Placing Order..." : `Pay ₹${totalAmount}`}
                 </Button>
             </form>
             </Form>
