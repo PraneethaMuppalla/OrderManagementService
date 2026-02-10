@@ -3,6 +3,7 @@ import { Loader2, Package, ChevronRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { BackendOrder, BackendOrderItem } from '@/types';
 
 export default function Orders() {
   const { data: orders, isLoading } = useUserOrders();
@@ -33,7 +34,7 @@ export default function Orders() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-extrabold tracking-tight mb-8">My Orders</h1>
       <div className="space-y-4">
-        {orders.map((order) => (
+        {orders.map((order: BackendOrder) => (
           <div key={order.id} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
                   <div>
@@ -60,7 +61,7 @@ export default function Orders() {
               <div className="border-t pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                    <p className="text-sm text-muted-foreground line-clamp-1 max-w-full sm:max-w-[70%]">
                        {/* Show names of items */}
-                       {order.items?.map(item => item.menuItem?.name || `Item #${item.menuItemId}`).join(', ')}
+                       {order.items?.map((item: BackendOrderItem) => item.menuItem?.name || `Item #${item.menuItemId}`).join(', ')}
                    </p>
                    <Button variant="outline" size="sm" asChild className="shrink-0 w-full sm:w-auto">
                        <Link to={`/order-status/${order.id}`}>

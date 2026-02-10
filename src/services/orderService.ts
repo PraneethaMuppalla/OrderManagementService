@@ -1,5 +1,5 @@
 import api from './api';
-import { BackendOrder, Order } from '@/types';
+import { BackendOrder } from '@/types';
 
 export interface PlaceOrderRequest {
   delivery_name: string;

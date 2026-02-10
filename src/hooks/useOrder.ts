@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { orderService, PlaceOrderRequest, PlaceOrderResponse } from '@/services/orderService';
-import { BackendOrder } from '@/types';
+import { orderService, PlaceOrderRequest } from '@/services/orderService';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useAppSelector } from '@/hooks/redux';
@@ -10,7 +9,7 @@ export const usePlaceOrder = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: PlaceOrderRequest) => orderService.placeOrder(data),
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] });
             queryClient.invalidateQueries({ queryKey: ['cart'] }); // Cart is cleared on backend
             // Success toast is handled in component or here if needed
